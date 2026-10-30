@@ -1,0 +1,73 @@
+<div class="container py-4">
+
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-calendar-alt text-primary me-2"></i>Congés</h2>
+      <p class="page-subtitle">Suivez les demandes et validations de congés</p>
+    </div>
+    <button class="btn btn-primary" routerLink="/conges/add">
+      <i class="fas fa-plus me-2"></i>Nouveau congé
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <div class="input-group search-box">
+      <span class="input-group-text"><i class="fas fa-search"></i></span>
+      <input type="text" class="form-control" placeholder="Rechercher par employé, type, statut..." [(ngModel)]="recherche">
+    </div>
+    <span class="count-pill">{{ congesFiltres.length }} congé(s)</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Employé</th>
+          <th>Type</th>
+          <th>Début</th>
+          <th>Fin</th>
+          <th>Statut</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let conge of congesFiltres">
+          <td><span class="matricule">#{{ conge.id }}</span></td>
+          <td class="fw-semibold text-dark">{{ conge.employe?.nom }} {{ conge.employe?.prenom }}</td>
+          <td>
+            <span class="badge text-capitalize" [ngClass]="{
+              'badge-soft-info': conge.type === 'annuel',
+              'badge-soft-warning': conge.type === 'maladie',
+              'badge-soft-secondary': conge.type === 'exceptionnel'
+            }">{{ conge.type }}</span>
+          </td>
+          <td>{{ conge.dateDebut | date:'dd/MM/yyyy' }}</td>
+          <td>{{ conge.dateFin | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="badge text-capitalize" [ngClass]="{
+              'badge-soft-warning': conge.statut === 'en_attente',
+              'badge-soft-success': conge.statut === 'valide',
+              'badge-soft-danger': conge.statut === 'refuse'
+            }">{{ (conge.statut || '').replace('_', ' ') }}</span>
+          </td>
+          <td class="text-center text-nowrap">
+            <button class="btn btn-sm btn-icon btn-soft-warning me-1" title="Modifier" (click)="modifierConge(conge.id)">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn btn-sm btn-icon btn-soft-danger" title="Supprimer" (click)="supprimerConge(conge.id)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="congesFiltres.length === 0">
+          <td colspan="7" class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <div>Aucun congé trouvé.</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

@@ -1,0 +1,76 @@
+<div class="container py-4">
+
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-file-contract text-primary me-2"></i>Contrats</h2>
+      <p class="page-subtitle">CDI, CDD, vacataires et stagiaires</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap"><button class="btn btn-light border" (click)="exporterPdf()"><i class="fas fa-file-pdf text-danger me-2"></i>Exporter PDF</button><button class="btn btn-primary" routerLink="/contrats/add">
+      <i class="fas fa-plus me-2"></i>Ajouter un contrat
+    </button></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="input-group search-box">
+      <span class="input-group-text"><i class="fas fa-search"></i></span>
+      <input type="text" class="form-control" placeholder="Rechercher par employé, type..." [(ngModel)]="recherche">
+    </div>
+    <span class="count-pill">{{ contratsFiltres.length }} contrat(s)</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Employé</th>
+          <th>Type</th>
+          <th>Début</th>
+          <th>Fin</th>
+          <th class="text-end">Salaire</th>
+          <th>Statut</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let contrat of contratsFiltres">
+          <td><span class="matricule">#{{ contrat.id }}</span></td>
+          <td class="fw-semibold text-dark">{{ contrat.employe?.nom }} {{ contrat.employe?.prenom }}</td>
+          <td>
+            <span class="badge" [ngClass]="{
+              'badge-soft-primary': contrat.typeContrat === 'CDI',
+              'badge-soft-info': contrat.typeContrat === 'CDD',
+              'badge-soft-warning': contrat.typeContrat === 'VACATAIRE',
+              'badge-soft-secondary': contrat.typeContrat === 'STAGE'
+            }">{{ contrat.typeContrat }}</span>
+          </td>
+          <td>{{ contrat.dateDebut | date:'dd/MM/yyyy' }}</td>
+          <td>{{ contrat.dateFin ? (contrat.dateFin | date:'dd/MM/yyyy') : 'En cours' }}</td>
+          <td class="text-end text-nowrap fw-semibold text-dark">{{ contrat.salaire | number:'1.0-0' }} FCFA</td>
+          <td>
+            <span class="badge text-capitalize" [ngClass]="{
+              'badge-soft-success': contrat.statut === 'actif',
+              'badge-soft-warning': contrat.statut === 'expire',
+              'badge-soft-danger': contrat.statut === 'termine'
+            }">{{ contrat.statut }}</span>
+          </td>
+          <td class="text-center text-nowrap">
+            <button class="btn btn-sm btn-icon btn-soft-warning me-1" title="Modifier" (click)="modifierContrat(contrat.id)">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn btn-sm btn-icon btn-soft-danger" title="Supprimer" (click)="supprimerContrat(contrat.id)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="contratsFiltres.length === 0">
+          <td colspan="8" class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <div>Aucun contrat trouvé.</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

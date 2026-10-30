@@ -1,0 +1,61 @@
+<div class="container py-4" style="max-width: 860px;">
+
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-clock text-primary me-2"></i>{{ isEditMode ? 'Modifier une présence' : 'Nouvelle présence' }}</h2>
+      <p class="page-subtitle">Les champs marqués d'un * sont obligatoires</p>
+    </div>
+  </div>
+
+  <div class="card p-4">
+    <form #f="ngForm" (ngSubmit)="onSubmit()">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Employé *</label>
+          <select class="form-select" [(ngModel)]="presence.employe_id" name="employe_id" required>
+            <option value="">Sélectionner un employé</option>
+            <option *ngFor="let employe of employes" [value]="employe.id">{{ employe.nom }} {{ employe.prenom }}</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Date *</label>
+          <input type="date" class="form-control" [(ngModel)]="presence.date" name="date" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Heure d'arrivée</label>
+          <input type="time" class="form-control" [(ngModel)]="presence.heureArrivee" name="heureArrivee">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Heure de départ</label>
+          <input type="time" class="form-control" [(ngModel)]="presence.heureDepart" name="heureDepart">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Statut *</label>
+          <select class="form-select" [(ngModel)]="presence.statut" name="statut" required>
+            <option value="present">Présent</option>
+            <option value="absent">Absent</option>
+            <option value="retard">Retard</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" role="switch" [(ngModel)]="presence.estJustifie" name="estJustifie" id="justifie">
+            <label class="form-check-label" for="justifie">Absence justifiée</label>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <div class="d-flex gap-2 justify-content-end">
+        <a routerLink="/presences" class="btn btn-light border">
+          <i class="fas fa-arrow-left me-2"></i>Annuler
+        </a>
+        <button type="submit" class="btn btn-primary" [disabled]="f.invalid">
+          <i class="fas fa-save me-2"></i>{{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>

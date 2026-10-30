@@ -1,0 +1,83 @@
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">📋 Liste des contrats</h2>
+    <button class="btn btn-primary" routerLink="/contrats/add">
+      <i class="fas fa-plus-circle"></i> Ajouter un contrat
+    </button>
+  </div>
+
+  <!-- BARRE DE RECHERCHE -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-search"></i></span>
+        <input type="text" class="form-control" placeholder="Rechercher par employé, type..." [(ngModel)]="recherche">
+      </div>
+    </div>
+    <div class="col-md-6 text-end">
+      <span class="badge bg-secondary">{{ contratsFiltres.length }} contrat(s) trouvé(s)</span>
+    </div>
+  </div>
+
+  <!-- TABLEAU -->
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Employé</th>
+          <th>Type</th>
+          <th>Date début</th>
+          <th>Date fin</th>
+          <th>Salaire</th>
+          <th>Statut</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let contrat of contratsFiltres">
+          <td><strong>{{ contrat.id }}</strong></td>
+          <td>{{ contrat.employe?.nom }} {{ contrat.employe?.prenom }}</td>
+          <td>
+            <span class="badge" [ngClass]="{
+              'bg-primary': contrat.typeContrat === 'CDI',
+              'bg-info': contrat.typeContrat === 'CDD',
+              'bg-warning': contrat.typeContrat === 'VACATAIRE',
+              'bg-secondary': contrat.typeContrat === 'STAGE'
+            }">
+              {{ contrat.typeContrat }}
+            </span>
+          </td>
+          <td>{{ contrat.dateDebut | date:'dd/MM/yyyy' }}</td>
+          <td>{{ contrat.dateFin ? (contrat.dateFin | date:'dd/MM/yyyy') : 'En cours' }}</td>
+          <td>{{ contrat.salaire | number:'1.0-0' }} FCFA</td>
+          <td>
+            <span class="badge" [ngClass]="{
+              'bg-success': contrat.statut === 'actif',
+              'bg-warning': contrat.statut === 'expire',
+              'bg-danger': contrat.statut === 'termine'
+            }">
+              {{ contrat.statut }}
+            </span>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-warning me-1" (click)="modifierContrat(contrat.id)">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="supprimerContrat(contrat.id)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="contratsFiltres.length === 0">
+          <td colspan="8" class="text-center text-muted py-4">
+            <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+            Aucun contrat trouvé.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

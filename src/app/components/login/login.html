@@ -1,0 +1,74 @@
+<div class="login-container">
+
+  <div class="login-card">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <i class="fas fa-users-cog"></i>
+      <h1>SI-GRH</h1>
+      <p>ISI SUPTECH – Dakar</p>
+    </div>
+
+    <!-- Formulaire -->
+    <form (ngSubmit)="onSubmit()">
+
+      <h2>Connexion</h2>
+
+      <!-- Erreur -->
+      <div *ngIf="errorMessage" class="alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">
+          <i class="fas fa-envelope"></i> Email
+        </label>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="votre.email@isisuptech.sn"
+          required
+          autocomplete="email">
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-group">
+        <label for="password">
+          <i class="fas fa-lock"></i> Mot de passe
+        </label>
+        <input
+          type="password"
+          id="password"
+          class="form-control"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="••••••••"
+          required
+          autocomplete="current-password">
+      </div>
+
+      <!-- Bouton -->
+      <button type="submit" class="btn-login" [disabled]="isLoading">
+        <span *ngIf="!isLoading">
+          <i class="fas fa-sign-in-alt"></i> Se connecter
+        </span>
+        <span *ngIf="isLoading">
+          <i class="fas fa-spinner fa-spin"></i> Connexion...
+        </span>
+      </button>
+
+    </form>
+
+    <!-- Lien retour accueil -->
+    <a routerLink="/" class="back-home">
+      <i class="fas fa-arrow-left"></i> Retour à l'accueil
+    </a>
+
+  </div>
+
+</div>

@@ -1,0 +1,130 @@
+<div class="container-fluid px-4 py-4" style="max-width: 1400px;">
+
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-chart-pie text-primary me-2"></i>Tableau de bord</h2>
+      <p class="page-subtitle">{{ salutation }} · {{ dateLabel }}</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="btn btn-light border" (click)="exporterRapport()">
+        <i class="fas fa-file-pdf text-danger me-2"></i>Rapport PDF
+      </button>
+      <a routerLink="/" class="btn btn-light border"><i class="fas fa-home me-2"></i>Accueil</a>
+    </div>
+  </div>
+
+  <!-- STATISTIQUES -->
+  <div class="stats-grid">
+    <div class="stat-card" style="--accent:#4f46e5">
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
+      <div><div class="stat-label">Employés</div><div class="stat-value">{{ totalEmployes }}</div></div>
+    </div>
+    <div class="stat-card" style="--accent:#059669">
+      <div class="stat-icon"><i class="fas fa-file-contract"></i></div>
+      <div><div class="stat-label">Contrats</div><div class="stat-value">{{ totalContrats }}</div></div>
+    </div>
+    <div class="stat-card" style="--accent:#d97706">
+      <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+      <div><div class="stat-label">Congés</div><div class="stat-value">{{ totalConges }}</div></div>
+    </div>
+    <div class="stat-card" style="--accent:#dc2626">
+      <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+      <div><div class="stat-label">Paies</div><div class="stat-value">{{ totalPaies }}</div></div>
+    </div>
+    <div class="stat-card" style="--accent:#0891b2">
+      <div class="stat-icon"><i class="fas fa-clock"></i></div>
+      <div><div class="stat-label">Présences</div><div class="stat-value">{{ totalPresences }}</div></div>
+    </div>
+    <div class="stat-card" style="--accent:#7c3aed">
+      <div class="stat-icon"><i class="fas fa-coins"></i></div>
+      <div><div class="stat-label">Masse salariale</div><div class="stat-value sm">{{ masseLabel }}<small> FCFA</small></div></div>
+    </div>
+  </div>
+
+  <!-- GRAPHIQUES -->
+  <div class="panel-grid">
+
+    <div class="panel">
+      <h6 class="panel-title">Contrats par type</h6>
+      <div *ngIf="total(contratsParType) === 0" class="panel-empty">Aucun contrat</div>
+      <div class="bar-row" *ngFor="let s of contratsParType">
+        <div class="bar-label"><span>{{ s.label }}</span><b>{{ s.count }}</b></div>
+        <div class="bar-track"><div class="bar-fill" [style.width.%]="pct(s, contratsParType)" [style.background]="s.color"></div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h6 class="panel-title">Congés par statut</h6>
+      <div class="donut-wrap">
+        <div class="donut" [style.background]="donut(congesParStatut)">
+          <div class="donut-hole"><strong>{{ total(congesParStatut) }}</strong><span>total</span></div>
+        </div>
+        <ul class="legend">
+          <li *ngFor="let s of congesParStatut"><i [style.background]="s.color"></i>{{ s.label }}<b>{{ s.count }}</b></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h6 class="panel-title">Présences par statut</h6>
+      <div class="donut-wrap">
+        <div class="donut" [style.background]="donut(presencesParStatut)">
+          <div class="donut-hole"><strong>{{ total(presencesParStatut) }}</strong><span>total</span></div>
+        </div>
+        <ul class="legend">
+          <li *ngFor="let s of presencesParStatut"><i [style.background]="s.color"></i>{{ s.label }}<b>{{ s.count }}</b></li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LISTES -->
+  <div class="lists-grid">
+
+    <div class="panel">
+      <div class="panel-head">
+        <h6 class="panel-title">Congés en attente</h6>
+        <a routerLink="/conges" class="panel-link">Tout voir</a>
+      </div>
+      <div *ngIf="congesEnAttente.length === 0" class="panel-empty">Aucune demande en attente</div>
+      <div class="item-row" *ngFor="let c of congesEnAttente">
+        <div>
+          <div class="item-name">{{ c.employe?.prenom }} {{ c.employe?.nom }}</div>
+          <div class="item-sub text-capitalize">{{ c.type }} · {{ c.dateDebut | date:'dd/MM' }} → {{ c.dateFin | date:'dd/MM/yyyy' }}</div>
+        </div>
+        <span class="badge badge-soft-warning">En attente</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h6 class="panel-title">Dernières embauches</h6>
+        <a routerLink="/employes" class="panel-link">Tout voir</a>
+      </div>
+      <div *ngIf="derniersEmployes.length === 0" class="panel-empty">Aucun employé</div>
+      <div class="item-row" *ngFor="let e of derniersEmployes">
+        <div class="d-flex align-items-center gap-3">
+          <span class="avatar">{{ (e.prenom || '').charAt(0) }}{{ (e.nom || '').charAt(0) }}</span>
+          <div>
+            <div class="item-name">{{ e.prenom }} {{ e.nom }}</div>
+            <div class="item-sub">{{ e.poste }}</div>
+          </div>
+        </div>
+        <span class="item-date">{{ e.dateEmbauche | date:'dd/MM/yyyy' }}</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ACCES RAPIDE -->
+  <h5 class="section-title"><i class="fas fa-bolt me-2 text-warning"></i>Accès rapide</h5>
+  <div class="quick-grid">
+    <a *ngFor="let l of quickLinks" [routerLink]="l.route" class="quick-card" [style.--accent]="l.color">
+      <span class="quick-icon"><i [class]="l.icon"></i></span>
+      <span class="quick-label">{{ l.label }}</span>
+      <i class="fas fa-arrow-right quick-arrow"></i>
+    </a>
+  </div>
+
+</div>

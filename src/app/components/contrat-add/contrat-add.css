@@ -1,0 +1,45 @@
+.card {
+  border-radius: 16px;
+  background: #ffffff;
+  border: none;
+}
+
+h2 {
+  color: #1a2a3a;
+}
+
+.form-label {
+  color: #4a5a6a;
+  font-weight: 600;
+}
+
+.form-control, .form-select {
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 1px solid #dfe3e8;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 0.15rem rgba(79, 70, 229, 0.15);
+}
+
+.btn-success {
+  background-color: #198754;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.btn-success:hover {
+  background-color: #157347;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+.btn-secondary {
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+}

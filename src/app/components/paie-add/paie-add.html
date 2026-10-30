@@ -1,0 +1,66 @@
+<div class="container py-4" style="max-width: 860px;">
+
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-money-bill-wave text-primary me-2"></i>{{ isEditMode ? 'Modifier une paie' : 'Nouvelle paie' }}</h2>
+      <p class="page-subtitle">Les champs marqués d'un * sont obligatoires</p>
+    </div>
+  </div>
+
+  <div class="card p-4">
+    <form #f="ngForm" (ngSubmit)="onSubmit()">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Employé *</label>
+          <select class="form-select" [(ngModel)]="paie.employe_id" name="employe_id" required>
+            <option value="">Sélectionner un employé</option>
+            <option *ngFor="let employe of employes" [value]="employe.id">{{ employe.nom }} {{ employe.prenom }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Mois *</label>
+          <input type="number" class="form-control" [(ngModel)]="paie.mois" name="mois" min="1" max="12" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Année *</label>
+          <input type="number" class="form-control" [(ngModel)]="paie.annee" name="annee" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Salaire de base (FCFA) *</label>
+          <input type="number" class="form-control" [(ngModel)]="paie.salaireBase" name="salaireBase" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Prime (FCFA)</label>
+          <input type="number" class="form-control" [(ngModel)]="paie.prime" name="prime">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Heures sup. (FCFA)</label>
+          <input type="number" class="form-control" [(ngModel)]="paie.heuresSupplementaires" name="heuresSupplementaires">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Retenues (FCFA)</label>
+          <input type="number" class="form-control" [(ngModel)]="paie.retenues" name="retenues">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Statut</label>
+          <select class="form-select" [(ngModel)]="paie.statut" name="statut">
+            <option value="preparer">Préparer</option>
+            <option value="valide">Validé</option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <div class="d-flex gap-2 justify-content-end">
+        <a routerLink="/paies" class="btn btn-light border">
+          <i class="fas fa-arrow-left me-2"></i>Annuler
+        </a>
+        <button type="submit" class="btn btn-primary" [disabled]="f.invalid">
+          <i class="fas fa-save me-2"></i>{{ isEditMode ? 'Mettre à jour' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>

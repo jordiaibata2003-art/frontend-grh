@@ -1,0 +1,124 @@
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterModule } from "@angular/router";
+import { EmployeService } from "../../services/employe";
+import { ContratService } from "../../services/contrat";
+import { CongeService } from "../../services/conge";
+import { PaieService } from "../../services/paie";
+import { PresenceService } from "../../services/presence";
+
+@Component({
+  selector: "app-dashboard",
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: "./dashboard.html",
+  styleUrls: ["./dashboard.css"],
+})
+export class DashboardComponent implements OnInit {
+  // ===== VOS VARIABLES (conservées) =====
+  totalEmployes: number = 0;
+  totalContrats: number = 0;
+  totalConges: number = 0;
+  totalPaies: number = 0;
+  totalPresences: number = 0;
+
+  // ===== STATS POUR LE TABLEAU =====
+  stats: any[] = [];
+
+  // ===== LIENS ACCÈS RAPIDE =====
+  quickLinks = [
+    {
+      label: "Employés",
+      route: "/employes",
+      icon: "fas fa-users",
+      color: "#4f46e5",
+    },
+    {
+      label: "Contrats",
+      route: "/contrats",
+      icon: "fas fa-file-contract",
+      color: "#059669",
+    },
+    {
+      label: "Congés",
+      route: "/conges",
+      icon: "fas fa-calendar-alt",
+      color: "#d97706",
+    },
+    {
+      label: "Paies",
+      route: "/paies",
+      icon: "fas fa-money-bill-wave",
+      color: "#dc2626",
+    },
+
+    {
+      label: "Présences",
+      route: "/presences",
+      icon: "fas fa-clock",
+      color: "#0891b2",
+    },
+  ];
+
+  constructor(
+    private employeService: EmployeService,
+    private contratService: ContratService,
+    private congeService: CongeService,
+    private paieService: PaieService,
+    private presenceService: PresenceService,
+  ) {}
+
+  ngOnInit(): void {
+    // Récupération des données
+    this.employeService.getEmployes().subscribe((data) => {
+      this.totalEmployes = data.length;
+      this.updateStats(
+        "Employés",
+        data.length,
+        "linear-gradient(135deg, #eef2ff, #e0e7ff)",
+      );
+    });
+    this.contratService.getContrats().subscribe((data) => {
+      this.totalContrats = data.length;
+      this.updateStats(
+        "Contrats",
+        data.length,
+        "linear-gradient(135deg, #ecfdf5, #d1fae5)",
+      );
+    });
+    this.congeService.getConges().subscribe((data) => {
+      this.totalConges = data.length;
+      this.updateStats(
+        "Congés",
+        data.length,
+        "linear-gradient(135deg, #fffbeb, #fef3c7)",
+      );
+    });
+    this.paieService.getPaies().subscribe((data) => {
+      this.totalPaies = data.length;
+      this.updateStats(
+        "Paies",
+        data.length,
+        "linear-gradient(135deg, #fef2f2, #fecaca)",
+      );
+    });
+    this.presenceService.getPresences().subscribe((data) => {
+      this.totalPresences = data.length;
+      this.updateStats(
+        "Présences",
+        data.length,
+        "linear-gradient(135deg, #ecfeff, #cffafe)",
+      );
+    });
+  }
+
+  updateStats(label: string, value: number, gradient: string) {
+    const existing = this.stats.find((s) => s.label === label);
+    const data = { label, value, gradient };
+    if (existing) {
+      Object.assign(existing, data);
+    } else {
+      this.stats.push(data);
+    }
+  }
+}

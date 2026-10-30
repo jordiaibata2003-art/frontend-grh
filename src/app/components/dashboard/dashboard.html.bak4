@@ -1,0 +1,45 @@
+<div class="container-fluid px-4 py-4" style="max-width: 1400px;">
+
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-chart-pie text-primary me-2"></i>Tableau de bord</h2>
+      <p class="page-subtitle">Vue d'ensemble de votre activité RH</p>
+    </div>
+    <a routerLink="/" class="btn btn-light border">
+      <i class="fas fa-home me-2"></i>Accueil
+    </a>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card" style="--accent:#4f46e5">
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
+      <div><div class="stat-label">Employés</div><div class="stat-value">{{ totalEmployes }}</div></div>
+    </div>
+    <div class="stat-card" style="--accent:#059669">
+      <div class="stat-icon"><i class="fas fa-file-contract"></i></div>
+      <div><div class="stat-label">Contrats</div><div class="stat-value">{{ totalContrats }}</div></div>
+    </div>
+    <div class="stat-card" style="--accent:#d97706">
+      <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+      <div><div class="stat-label">Congés</div><div class="stat-value">{{ totalConges }}</div></div>
+    </div>
+    <div class="stat-card" style="--accent:#dc2626">
+      <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+      <div><div class="stat-label">Paies</div><div class="stat-value">{{ totalPaies }}</div></div>
+    </div>
+    <div class="stat-card" style="--accent:#0891b2">
+      <div class="stat-icon"><i class="fas fa-clock"></i></div>
+      <div><div class="stat-label">Présences</div><div class="stat-value">{{ totalPresences }}</div></div>
+    </div>
+  </div>
+
+  <h5 class="section-title"><i class="fas fa-bolt me-2 text-warning"></i>Accès rapide</h5>
+  <div class="quick-grid">
+    <a *ngFor="let l of quickLinks" [routerLink]="l.route" class="quick-card" [style.--accent]="l.color">
+      <span class="quick-icon"><i [class]="l.icon"></i></span>
+      <span class="quick-label">{{ l.label }}</span>
+      <i class="fas fa-arrow-right quick-arrow"></i>
+    </a>
+  </div>
+
+</div>

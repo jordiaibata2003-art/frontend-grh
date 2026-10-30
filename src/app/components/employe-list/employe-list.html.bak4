@@ -1,0 +1,64 @@
+<div class="container py-4">
+
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-users text-primary me-2"></i>Employés</h2>
+      <p class="page-subtitle">Gérez les dossiers de votre personnel</p>
+    </div>
+    <button class="btn btn-primary" routerLink="/employes/add">
+      <i class="fas fa-plus me-2"></i>Ajouter un employé
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <div class="input-group search-box">
+      <span class="input-group-text"><i class="fas fa-search"></i></span>
+      <input type="text" class="form-control" placeholder="Rechercher par nom, prénom, poste, département..." [(ngModel)]="recherche">
+    </div>
+    <span class="count-pill">{{ employesFiltres.length }} employé(s)</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Matricule</th>
+          <th>Employé</th>
+          <th>Poste</th>
+          <th>Email</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let employe of employesFiltres">
+          <td><span class="matricule">{{ employe.matricule }}</span></td>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <span class="avatar">{{ (employe.prenom || '').charAt(0) }}{{ (employe.nom || '').charAt(0) }}</span>
+              <div>
+                <div class="fw-semibold text-dark">{{ employe.prenom }} {{ employe.nom }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ employe.poste }}</td>
+          <td class="text-muted">{{ employe.email }}</td>
+          <td class="text-center text-nowrap">
+            <button class="btn btn-sm btn-icon btn-soft-warning me-1" title="Modifier" (click)="modifierEmploye(employe.id)">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn btn-sm btn-icon btn-soft-danger" title="Supprimer" (click)="supprimerEmploye(employe.id)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="employesFiltres.length === 0">
+          <td colspan="5" class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <div>Aucun employé trouvé.</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

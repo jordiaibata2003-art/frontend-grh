@@ -1,0 +1,14 @@
+# Dépendances
+/node_modules/
+
+# Fichiers de build
+/dist/
+/out-tsc/
+/tmp/
+
+# Fichiers de cache Angular
+.angular/
+
+# Fichiers de logs
+npm-debug.log
+yarn-error.log

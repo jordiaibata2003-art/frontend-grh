@@ -1,0 +1,50 @@
+<nav class="navbar-app">
+  <div class="navbar-content">
+
+    <!-- Logo -->
+    <a routerLink="/dashboard" class="navbar-logo">
+      <i class="fas fa-users-cog"></i>
+      <span>SI-GRH</span>
+    </a>
+
+    <!-- Liens -->
+    <ul class="navbar-links">
+      <li>
+        <a routerLink="/dashboard" routerLinkActive="active">
+          <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+      </li>
+      <li>
+        <a routerLink="/employes" routerLinkActive="active">
+          <i class="fas fa-users"></i> Employés
+        </a>
+      </li>
+      <li>
+        <a routerLink="/contrats" routerLinkActive="active">
+          <i class="fas fa-file-contract"></i> Contrats
+        </a>
+      </li>
+      <li>
+        <a routerLink="/conges" routerLinkActive="active">
+          <i class="fas fa-calendar-alt"></i> Congés
+        </a>
+      </li>
+      <li>
+        <a routerLink="/paies" routerLinkActive="active">
+          <i class="fas fa-money-bill-wave"></i> Paies
+        </a>
+      </li>
+      <li>
+        <a routerLink="/presences" routerLinkActive="active">
+          <i class="fas fa-clock"></i> Présences
+        </a>
+      </li>
+    </ul>
+
+    <!-- Déconnexion -->
+    <button class="btn-logout" (click)="logout()">
+      <i class="fas fa-sign-out-alt"></i> Déconnexion
+    </button>
+
+  </div>
+</nav>

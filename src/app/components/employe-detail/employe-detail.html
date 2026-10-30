@@ -1,0 +1,11 @@
+<div class="container mt-4">
+  <h2>Détail de l'employé</h2>
+  <div *ngIf="employe">
+    <p><strong>Matricule :</strong> {{ employe.matricule }}</p>
+    <p><strong>Nom :</strong> {{ employe.nom }}</p>
+    <p><strong>Prénom :</strong> {{ employe.prenom }}</p>
+    <p><strong>Email :</strong> {{ employe.email }}</p>
+    <p><strong>Poste :</strong> {{ employe.poste }}</p>
+  </div>
+  <a routerLink="/employes" class="btn btn-secondary">Retour</a>
+</div>

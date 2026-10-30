@@ -1,0 +1,156 @@
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterModule } from "@angular/router";
+import { EmployeService } from "../../services/employe";
+import { ContratService } from "../../services/contrat";
+import { CongeService } from "../../services/conge";
+import { PaieService } from "../../services/paie";
+import { PresenceService } from "../../services/presence";
+import { PdfService } from "../../services/pdf";
+
+interface Segment { label: string; count: number; color: string; }
+
+@Component({
+  selector: "app-dashboard",
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: "./dashboard.html",
+  styleUrls: ["./dashboard.css"],
+})
+export class DashboardComponent implements OnInit {
+  totalEmployes = 0;
+  totalContrats = 0;
+  totalConges = 0;
+  totalPaies = 0;
+  totalPresences = 0;
+  masseLabel = "0";
+
+  contratsParType: Segment[] = [];
+  congesParStatut: Segment[] = [];
+  presencesParStatut: Segment[] = [];
+  congesEnAttente: any[] = [];
+  derniersEmployes: any[] = [];
+
+  salutation = "";
+  dateLabel = "";
+
+  quickLinks = [
+    { label: "Employés", route: "/employes", icon: "fas fa-users", color: "#4f46e5" },
+    { label: "Contrats", route: "/contrats", icon: "fas fa-file-contract", color: "#059669" },
+    { label: "Congés", route: "/conges", icon: "fas fa-calendar-alt", color: "#d97706" },
+    { label: "Paies", route: "/paies", icon: "fas fa-money-bill-wave", color: "#dc2626" },
+    { label: "Présences", route: "/presences", icon: "fas fa-clock", color: "#0891b2" },
+  ];
+
+  constructor(
+    private employeService: EmployeService,
+    private contratService: ContratService,
+    private congeService: CongeService,
+    private paieService: PaieService,
+    private presenceService: PresenceService,
+    private pdf: PdfService,
+  ) {}
+
+  ngOnInit(): void {
+    const now = new Date();
+    const h = now.getHours();
+    let nom = "";
+    try {
+      const u = JSON.parse(localStorage.getItem("utilisateur") || "null");
+      nom = u?.prenom || u?.nom || "";
+    } catch { /* ignoré */ }
+    this.salutation = (h < 18 ? "Bonjour" : "Bonsoir") + (nom ? " " + nom : "");
+    const d = now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    this.dateLabel = d.charAt(0).toUpperCase() + d.slice(1);
+
+    this.employeService.getEmployes().subscribe((data: any[]) => {
+      this.totalEmployes = data.length;
+      this.derniersEmployes = [...data]
+        .sort((a, b) => new Date(b.dateEmbauche).getTime() - new Date(a.dateEmbauche).getTime())
+        .slice(0, 5);
+    });
+
+    this.contratService.getContrats().subscribe((data: any[]) => {
+      this.totalContrats = data.length;
+      this.contratsParType = [
+        this.seg("CDI", data, (x) => x.typeContrat === "CDI", "#4f46e5"),
+        this.seg("CDD", data, (x) => x.typeContrat === "CDD", "#0891b2"),
+        this.seg("Vacataire", data, (x) => x.typeContrat === "VACATAIRE", "#d97706"),
+        this.seg("Stage", data, (x) => x.typeContrat === "STAGE", "#64748b"),
+      ];
+    });
+
+    this.congeService.getConges().subscribe((data: any[]) => {
+      this.totalConges = data.length;
+      this.congesParStatut = [
+        this.seg("En attente", data, (x) => x.statut === "en_attente", "#f59e0b"),
+        this.seg("Validés", data, (x) => x.statut === "valide", "#10b981"),
+        this.seg("Refusés", data, (x) => x.statut === "refuse", "#ef4444"),
+      ];
+      this.congesEnAttente = data.filter((x) => x.statut === "en_attente").slice(0, 5);
+    });
+
+    this.paieService.getPaies().subscribe((data: any[]) => {
+      this.totalPaies = data.length;
+      const masse = data
+        .filter((x) => x.statut === "valide")
+        .reduce((s, x) => s + (Number(x.salaireNet) || 0), 0);
+      this.masseLabel = this.pdf.montant(masse);
+    });
+
+    this.presenceService.getPresences().subscribe((data: any[]) => {
+      this.totalPresences = data.length;
+      this.presencesParStatut = [
+        this.seg("Présents", data, (x) => x.statut === "present", "#10b981"),
+        this.seg("Retards", data, (x) => x.statut === "retard", "#f59e0b"),
+        this.seg("Absents", data, (x) => x.statut === "absent", "#ef4444"),
+      ];
+    });
+  }
+
+  private seg(label: string, data: any[], test: (x: any) => boolean, color: string): Segment {
+    return { label, count: data.filter(test).length, color };
+  }
+
+  total(segs: Segment[]): number {
+    return segs.reduce((s, x) => s + x.count, 0);
+  }
+
+  pct(s: Segment, segs: Segment[]): number {
+    const t = this.total(segs);
+    return t ? Math.round((s.count / t) * 100) : 0;
+  }
+
+  donut(segs: Segment[]): string {
+    const t = this.total(segs);
+    if (!t) return "#e5e9f0";
+    let acc = 0;
+    const parts = segs
+      .filter((s) => s.count > 0)
+      .map((s) => {
+        const start = acc;
+        acc += (s.count / t) * 100;
+        return `${s.color} ${start}% ${acc}%`;
+      });
+    return `conic-gradient(${parts.join(", ")})`;
+  }
+
+  exporterRapport(): void {
+    const lignes = (segs: Segment[]) => segs.map((s) => [s.label, s.count] as (string | number)[]);
+    this.pdf.rapportRH({
+      stats: [
+        ["Employés", this.totalEmployes],
+        ["Contrats", this.totalContrats],
+        ["Congés", this.totalConges],
+        ["Paies", this.totalPaies],
+        ["Présences", this.totalPresences],
+        ["Masse salariale (paies validées)", this.masseLabel + " FCFA"],
+      ],
+      sections: [
+        { titre: "Contrats par type", lignes: lignes(this.contratsParType) },
+        { titre: "Congés par statut", lignes: lignes(this.congesParStatut) },
+        { titre: "Présences par statut", lignes: lignes(this.presencesParStatut) },
+      ],
+    });
+  }
+}

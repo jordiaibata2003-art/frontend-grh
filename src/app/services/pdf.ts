@@ -1,0 +1,214 @@
+import { Injectable } from '@angular/core';
+
+type Cell = string | number;
+
+const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+
+@Injectable({ providedIn: 'root' })
+export class PdfService {
+  private readonly INK: [number, number, number] = [26, 42, 58];
+  private readonly PRIMARY: [number, number, number] = [79, 70, 229];
+  private readonly ORG = 'SI-GRH – ISI SUPTECH Dakar';
+
+  /** Montant avec espaces simples (les espaces fines Unicode s'affichent mal dans jsPDF) */
+  montant(n: any): string {
+    const v = Math.round(Number(n) || 0);
+    return (v < 0 ? '-' : '') + String(Math.abs(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
+
+  date(d: any): string {
+    if (!d) return '';
+    const x = new Date(d);
+    return isNaN(x.getTime()) ? String(d) : x.toLocaleDateString('fr-FR');
+  }
+
+  private async libs() {
+    const [{ jsPDF }, at] = await Promise.all([import('jspdf'), import('jspdf-autotable')]);
+    return { jsPDF, autoTable: at.default };
+  }
+
+  private header(doc: any, titre: string, sous?: string): number {
+    const w = doc.internal.pageSize.getWidth();
+    doc.setFillColor(...this.INK);
+    doc.rect(0, 0, w, 30, 'F');
+    doc.setFillColor(...this.PRIMARY);
+    doc.rect(0, 30, w, 1.5, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(titre, 14, 14);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text(sous ?? '', 14, 22);
+    doc.text(this.ORG, w - 14, 14, { align: 'right' });
+    doc.text('Édité le ' + new Date().toLocaleDateString('fr-FR'), w - 14, 22, { align: 'right' });
+    doc.setTextColor(51, 65, 85);
+    return 40;
+  }
+
+  private footer(doc: any): void {
+    const n = doc.getNumberOfPages();
+    const w = doc.internal.pageSize.getWidth();
+    const h = doc.internal.pageSize.getHeight();
+    for (let i = 1; i <= n; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(130, 140, 155);
+      doc.text(`${this.ORG}  |  Page ${i} / ${n}`, w / 2, h - 8, { align: 'center' });
+    }
+  }
+
+  /** Export générique d'une liste */
+  async tableau(o: { titre: string; sous?: string; colonnes: string[]; lignes: Cell[][]; fichier: string; paysage?: boolean; colDroite?: number[] }): Promise<void> {
+    const { jsPDF, autoTable } = await this.libs();
+    const doc: any = new jsPDF({ orientation: o.paysage ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
+    const y = this.header(doc, o.titre, o.sous);
+    const columnStyles: any = Object.fromEntries((o.colDroite ?? []).map((i) => [i, { halign: 'right' }]));
+    autoTable(doc, {
+      startY: y,
+      head: [o.colonnes],
+      body: o.lignes.length ? o.lignes : [['Aucune donnée']],
+      theme: 'striped',
+      headStyles: { fillColor: this.INK, textColor: 255, fontStyle: 'bold', fontSize: 9 },
+      alternateRowStyles: { fillColor: [245, 247, 251] },
+      styles: { fontSize: 9, cellPadding: 3, textColor: [51, 65, 85] },
+      columnStyles,
+      margin: { left: 14, right: 14 },
+    });
+    this.footer(doc);
+    doc.save(o.fichier);
+  }
+
+  /** Lit le premier champ non vide parmi plusieurs noms possibles (camelCase / snake_case) */
+  num(o: any, ...keys: string[]): number {
+    for (const k of keys) {
+      const v = o?.[k];
+      if (v !== undefined && v !== null && v !== '') {
+        const n = Number(String(v).replace(/\s/g, '').replace(',', '.'));
+        if (!isNaN(n)) return n;
+      }
+    }
+    return 0;
+  }
+
+  /** Bulletin de paie d'un employé */
+  async bulletinPaie(p: any): Promise<void> {
+    const { jsPDF, autoTable } = await this.libs();
+    const doc: any = new jsPDF({ unit: 'mm', format: 'a4' });
+    const mois = MOIS[(Number(p.mois) || 0) - 1] ?? String(p.mois ?? '');
+    const y = this.header(doc, 'BULLETIN DE PAIE', `Période : ${mois} ${p.annee ?? ''}`);
+    const e = p.employe ?? {};
+    const nom = `${e.prenom ?? ''} ${e.nom ?? ''}`.trim() || 'Employé';
+
+    const base = this.num(p, 'salaireBase', 'salaire_base');
+    const prime = this.num(p, 'prime', 'primes');
+    const hs = this.num(p, 'heuresSupplementaires', 'heures_supplementaires', 'heuresSup', 'heures_sup');
+    const ret = this.num(p, 'retenues', 'retenue');
+    let net = this.num(p, 'salaireNet', 'salaire_net', 'net');
+    if (!net) net = base + prime + hs - ret;
+
+    doc.setFillColor(243, 245, 251);
+    doc.roundedRect(14, y, 182, 26, 3, 3, 'F');
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Employé', 20, y + 8);
+    doc.text('Informations', 110, y + 8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(nom, 20, y + 14);
+    doc.text(`Matricule : ${e.matricule ?? '-'}`, 20, y + 20);
+    doc.text(`Poste : ${e.poste ?? '-'}`, 110, y + 14);
+    doc.text(`Statut : ${p.statut ?? '-'}`, 110, y + 20);
+
+    autoTable(doc, {
+      startY: y + 34,
+      head: [['Désignation', 'Montant (FCFA)']],
+      body: [
+        ['Salaire de base', this.montant(base)],
+        ['Prime', this.montant(prime)],
+        ['Heures supplémentaires', this.montant(hs)],
+        ['Retenues', '- ' + this.montant(ret)],
+      ],
+      foot: [['NET À PAYER', this.montant(net)]],
+      showFoot: 'lastPage',
+      theme: 'grid',
+      headStyles: { fillColor: this.INK, textColor: 255 },
+      footStyles: { fillColor: this.PRIMARY, textColor: 255, fontStyle: 'bold', fontSize: 11 },
+      styles: { fontSize: 10, cellPadding: 4, textColor: [51, 65, 85] },
+      columnStyles: { 1: { halign: 'right' } },
+      margin: { left: 14, right: 14 },
+    });
+
+    const fin = (doc.lastAutoTable?.finalY ?? y + 80) + 28;
+    doc.setFontSize(10);
+    doc.text("L'employeur", 30, fin);
+    doc.text("L'employé", 150, fin);
+    doc.setDrawColor(180, 188, 200);
+    doc.line(20, fin + 18, 80, fin + 18);
+    doc.line(140, fin + 18, 190, fin + 18);
+
+    this.footer(doc);
+    doc.save(`bulletin-${(e.nom ?? 'employe').toString().toLowerCase()}-${p.mois}-${p.annee}.pdf`);
+  }
+  /** Attestation de travail */
+  async attestationTravail(e: any): Promise<void> {
+    const { jsPDF } = await this.libs();
+    const doc: any = new jsPDF({ unit: 'mm', format: 'a4' });
+    const nom = `${e.prenom ?? ''} ${e.nom ?? ''}`.trim();
+    this.header(doc, 'ATTESTATION DE TRAVAIL', this.ORG);
+
+    doc.setFontSize(12);
+    doc.setTextColor(30, 41, 59);
+    const dep = e.departement ? ` au sein du département ${e.departement}` : '';
+    const texte =
+      `Nous soussignés, ${this.ORG}, attestons que ${nom}, matricule ${e.matricule ?? '-'}, ` +
+      `occupe le poste de ${e.poste ?? '-'}${dep}` +
+      (e.dateEmbauche ? ` depuis le ${this.date(e.dateEmbauche)}.` : '.');
+    doc.text(doc.splitTextToSize(texte, 170), 20, 70, { lineHeightFactor: 1.7 });
+    doc.text(
+      doc.splitTextToSize("Cette attestation est délivrée à l'intéressé(e) pour servir et valoir ce que de droit.", 170),
+      20, 110, { lineHeightFactor: 1.7 },
+    );
+    doc.text(`Fait à Dakar, le ${new Date().toLocaleDateString('fr-FR')}`, 20, 140);
+    doc.setFont('helvetica', 'bold');
+    doc.text('La Direction', 140, 160);
+    doc.setDrawColor(180, 188, 200);
+    doc.line(130, 185, 190, 185);
+
+    this.footer(doc);
+    doc.save(`attestation-${(e.nom ?? 'employe').toString().toLowerCase()}.pdf`);
+  }
+
+  /** Rapport RH (dashboard) */
+  async rapportRH(d: { stats: [string, Cell][]; sections: { titre: string; lignes: Cell[][] }[] }): Promise<void> {
+    const { jsPDF, autoTable } = await this.libs();
+    const doc: any = new jsPDF({ unit: 'mm', format: 'a4' });
+    let y = this.header(doc, 'RAPPORT RH', "Synthèse de l'activité");
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Indicateur', 'Valeur']],
+      body: d.stats,
+      headStyles: { fillColor: this.INK, textColor: 255 },
+      styles: { fontSize: 10, cellPadding: 3.5, textColor: [51, 65, 85] },
+      columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } },
+      margin: { left: 14, right: 14 },
+    });
+
+    for (const s of d.sections) {
+      y = (doc.lastAutoTable?.finalY ?? y) + 10;
+      autoTable(doc, {
+        startY: y,
+        head: [[s.titre, 'Nombre']],
+        body: s.lignes.length ? s.lignes : [['Aucune donnée', '0']],
+        headStyles: { fillColor: this.PRIMARY, textColor: 255 },
+        alternateRowStyles: { fillColor: [245, 247, 251] },
+        styles: { fontSize: 10, cellPadding: 3, textColor: [51, 65, 85] },
+        columnStyles: { 1: { halign: 'right' } },
+        margin: { left: 14, right: 14 },
+      });
+    }
+
+    this.footer(doc);
+    doc.save('rapport-rh.pdf');
+  }
+}

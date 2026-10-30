@@ -1,0 +1,50 @@
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { RouterModule, Router } from "@angular/router";
+import { PaieService } from "../../services/paie";
+
+@Component({
+  selector: "app-paie-list",
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
+  templateUrl: "./paie-list.html",
+  styleUrls: ["./paie-list.css"],
+})
+export class PaieListComponent implements OnInit {
+  paies: any[] = [];
+  recherche: string = "";
+
+  constructor(
+    private paieService: PaieService,
+    private router: Router,
+  ) {}
+
+  ngOnInit(): void {
+    this.paieService.getPaies().subscribe((data) => (this.paies = data));
+  }
+
+  get paiesFiltres() {
+    if (!this.recherche) return this.paies;
+    const r = this.recherche.toLowerCase();
+    return this.paies.filter(
+      (p) =>
+        p.employe?.nom?.toLowerCase().includes(r) ||
+        p.employe?.prenom?.toLowerCase().includes(r) ||
+        String(p.mois).includes(r) ||
+        String(p.annee).includes(r) ||
+        p.statut?.toLowerCase().includes(r),
+    );
+  }
+
+  modifierPaie(id: number) {
+    this.router.navigate(["/paies/edit", id]);
+  }
+  supprimerPaie(id: number) {
+    if (confirm("Voulez-vous vraiment supprimer cette paie ?")) {
+      this.paieService.deletePaie(id).subscribe(() => {
+        this.paies = this.paies.filter((p) => p.id !== id);
+      });
+    }
+  }
+}

@@ -1,0 +1,66 @@
+import { PdfService } from '../../services/pdf';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { RouterModule, Router } from "@angular/router";
+import { PresenceService } from "../../services/presence";
+
+@Component({
+  selector: "app-presence-list",
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
+  templateUrl: "./presence-list.html",
+  styleUrls: ["./presence-list.css"],
+})
+export class PresenceListComponent implements OnInit {
+  private pdf = inject(PdfService);
+
+  exporterPdf(): void {
+    this.pdf.tableau({
+      titre: 'Liste des présences',
+      sous: `${this.presencesFiltres.length} présence(s)`,
+      colonnes: ['Date', 'Employé', 'Arrivée', 'Départ', 'Statut', 'Justifié'],
+      lignes: this.presencesFiltres.map((p: any) => [
+        this.pdf.date(p.date),
+        `${p.employe?.prenom ?? ''} ${p.employe?.nom ?? ''}`.trim(),
+        p.heureArrivee ?? '', p.heureDepart ?? '', p.statut, p.estJustifie ? 'Oui' : 'Non',
+      ]),
+      fichier: 'presences.pdf',
+    });
+  }
+  presences: any[] = [];
+  recherche: string = "";
+
+  constructor(
+    private presenceService: PresenceService,
+    private router: Router,
+  ) {}
+
+  ngOnInit(): void {
+    this.presenceService
+      .getPresences()
+      .subscribe((data) => (this.presences = data));
+  }
+
+  get presencesFiltres() {
+    if (!this.recherche) return this.presences;
+    const r = this.recherche.toLowerCase();
+    return this.presences.filter(
+      (p) =>
+        p.employe?.nom?.toLowerCase().includes(r) ||
+        p.employe?.prenom?.toLowerCase().includes(r) ||
+        p.statut?.toLowerCase().includes(r),
+    );
+  }
+
+  modifierPresence(id: number) {
+    this.router.navigate(["/presences/edit", id]);
+  }
+  supprimerPresence(id: number) {
+    if (confirm("Voulez-vous vraiment supprimer cette présence ?")) {
+      this.presenceService.deletePresence(id).subscribe(() => {
+        this.presences = this.presences.filter((p) => p.id !== id);
+      });
+    }
+  }
+}

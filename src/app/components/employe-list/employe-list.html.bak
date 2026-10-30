@@ -1,0 +1,63 @@
+<div class="container mt-4">
+
+  <!-- EN-TÊTE -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">📋 Liste des employés</h2>
+    <button class="btn btn-primary" routerLink="/employes/add">
+      <i class="fas fa-plus-circle"></i> Ajouter un employé
+    </button>
+  </div>
+
+  <!-- BARRE DE RECHERCHE -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-search"></i></span>
+        <input type="text" class="form-control" placeholder="Rechercher par nom, prénom, poste, département..." [(ngModel)]="recherche">
+      </div>
+    </div>
+    <div class="col-md-6 text-end">
+      <span class="badge bg-secondary">{{ employesFiltres.length }} employé(s) trouvé(s)</span>
+    </div>
+  </div>
+
+  <!-- TABLEAU -->
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Matricule</th>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Poste</th>
+          <th>Email</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let employe of employesFiltres">
+          <td><strong>{{ employe.matricule }}</strong></td>
+          <td>{{ employe.nom }}</td>
+          <td>{{ employe.prenom }}</td>
+          <td>{{ employe.poste }}</td>
+          <td>{{ employe.email }}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-warning me-1" (click)="modifierEmploye(employe.id)">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="supprimerEmploye(employe.id)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="employesFiltres.length === 0">
+          <td colspan="6" class="text-center text-muted py-4">
+            <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+            Aucun employé trouvé.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

@@ -1,0 +1,21 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterOutlet } from '@angular/router';
+import { NavbarComponent } from './components/navbar/navbar';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, NavbarComponent],
+  templateUrl: './app.html',
+})
+export class App {
+  title = 'frontend-grh';
+
+  constructor(private router: Router) {}
+
+  get showNavbar(): boolean {
+    const url = this.router.url.split('?')[0].split('#')[0];
+    return url !== '/' && url !== '' && !url.startsWith('/login');
+  }
+}

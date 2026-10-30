@@ -1,0 +1,65 @@
+.container {
+  padding-bottom: 40px;
+}
+
+h2 {
+  color: #1a2a3a;
+}
+
+.table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.table thead {
+  background: #1a2a3a;
+  color: white;
+}
+
+.table thead th {
+  border: none;
+  padding: 14px 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table tbody td {
+  padding: 14px 16px;
+  border-color: #eef2f5;
+}
+
+.table-hover tbody tr:hover {
+  background: #f8fbff;
+  transition: background 0.2s ease;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  border-radius: 8px;
+  margin: 0 2px;
+}
+
+.input-group-text {
+  background: #f8fbff;
+  border-right: none;
+}
+
+.form-control {
+  border-left: none;
+}
+
+.form-control:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 0.15rem rgba(79, 70, 229, 0.15);
+}

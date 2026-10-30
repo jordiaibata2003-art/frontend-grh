@@ -1,0 +1,75 @@
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">💰 Liste des paies</h2>
+    <button class="btn btn-primary" routerLink="/paies/add">
+      <i class="fas fa-plus-circle"></i> Nouvelle paie
+    </button>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-search"></i></span>
+        <input type="text" class="form-control" placeholder="Rechercher par employé, mois, statut..." [(ngModel)]="recherche">
+      </div>
+    </div>
+    <div class="col-md-6 text-end">
+      <span class="badge bg-secondary">{{ paiesFiltres.length }} paie(s) trouvée(s)</span>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Employé</th>
+          <th>Mois</th>
+          <th>Année</th>
+          <th>Salaire base</th>
+          <th>Prime</th>
+          <th>H. sup.</th>
+          <th>Retenues</th>
+          <th>Salaire net</th>
+          <th>Statut</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let paie of paiesFiltres">
+          <td><strong>{{ paie.id }}</strong></td>
+          <td>{{ paie.employe?.nom }} {{ paie.employe?.prenom }}</td>
+          <td>{{ paie.mois }}</td>
+          <td>{{ paie.annee }}</td>
+          <td>{{ paie.salaireBase | number:'1.0-0' }} FCFA</td>
+          <td>{{ paie.prime | number:'1.0-0' }} FCFA</td>
+          <td>{{ paie.heuresSupplementaires | number:'1.0-0' }} FCFA</td>
+          <td>{{ paie.retenues | number:'1.0-0' }} FCFA</td>
+          <td><strong>{{ paie.salaireNet | number:'1.0-0' }} FCFA</strong></td>
+          <td>
+            <span class="badge" [ngClass]="{
+              'bg-warning text-dark': paie.statut === 'preparer',
+              'bg-success': paie.statut === 'valide'
+            }">{{ paie.statut }}</span>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-warning me-1" (click)="modifierPaie(paie.id)">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="supprimerPaie(paie.id)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="paiesFiltres.length === 0">
+          <td colspan="11" class="text-center text-muted py-4">
+            <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+            Aucune paie trouvée.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
